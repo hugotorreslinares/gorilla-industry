@@ -231,6 +231,21 @@ import DecorFrame from "./DecorFrame.astro";
     letter-spacing: -0.05em;
     color: var(--text-heading-light);
     text-align: center;
+    text-shadow: 0 0.06em 0 var(--bg-dark);
+    transition:
+      transform 0.15s ease,
+      text-shadow 0.15s ease;
+  }
+
+  h1:hover {
+    transform: translateY(0.06em);
+    text-shadow: 0 0 0 var(--bg-dark);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    h1 {
+      transition: none;
+    }
   }
 
   .subtitle {
