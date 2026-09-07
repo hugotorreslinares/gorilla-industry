@@ -39,6 +39,17 @@ const images = [
     height: 100%;
     max-width: none;
     object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .cell:hover img {
+    transform: scale(1.08);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cell img {
+      transition: none;
+    }
   }
 
   @media (max-width: 640px) {
