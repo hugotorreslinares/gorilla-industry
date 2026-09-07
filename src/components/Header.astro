@@ -1,0 +1,134 @@
+<header class="header">
+  <a href="/" class="logo">
+    <img src="/images/logo.svg" alt="Gorilla Industry" width="120" height="70" />
+  </a>
+
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav class="nav" id="site-nav">
+    <a href="#about">ABOUT</a>
+    <a href="#services">SERVICES</a>
+    <a href="#contact">CONTACT</a>
+    <div class="lang">
+      <span class="active">EN</span><span> / ES</span>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+  const nav = document.getElementById("site-nav");
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = nav?.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
+    document.body.classList.toggle("nav-open", Boolean(isOpen));
+  });
+
+  nav?.querySelectorAll("a").forEach((link) =>
+    link.addEventListener("click", () => {
+      nav.classList.remove("open");
+      toggle?.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("nav-open");
+    })
+  );
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px clamp(20px, 4vw, 80px);
+    background: var(--bg-dark);
+  }
+
+  .logo {
+    display: block;
+    width: 96px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .logo img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 60;
+  }
+
+  .menu-toggle span {
+    display: block;
+    height: 2px;
+    background: var(--text-body-light);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--text-body-light);
+  }
+
+  .lang {
+    padding-left: 24px;
+    border-left: 2px solid var(--border-body-light);
+  }
+
+  .lang .active {
+    font-weight: 700;
+    color: var(--text-heading-light);
+  }
+
+  @media (max-width: 900px) {
+    .menu-toggle {
+      display: flex;
+    }
+
+    .nav {
+      position: fixed;
+      inset: 0 0 0 30%;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 32px;
+      padding: 32px clamp(20px, 6vw, 48px);
+      background: var(--bg-dark);
+      border-left: 1px solid var(--border-dark);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .nav.open {
+      transform: translateX(0);
+    }
+
+    .lang {
+      padding-left: 0;
+      border-left: none;
+    }
+  }
+</style>

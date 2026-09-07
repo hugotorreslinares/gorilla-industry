@@ -1,0 +1,86 @@
+---
+interface Props {
+  number: string;
+  title: string;
+  highlighted?: boolean;
+  items?: string[];
+}
+
+const { number, title, highlighted = false, items } = Astro.props;
+---
+
+<div class:list={["service", { highlighted }]}>
+  <div class="heading">
+    <span class="number">{number}</span>
+    <p class="title">{title}</p>
+  </div>
+  {
+    items && (
+      <ul class="items">
+        {items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+<style>
+  .service {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 36px;
+    width: 100%;
+    padding: clamp(32px, 4vw, 50px) 0 clamp(32px, 5vw, 60px);
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .service.highlighted {
+    background: var(--bg-light);
+    border-bottom: none;
+    justify-content: space-between;
+    padding: clamp(32px, 4vw, 50px) clamp(24px, 6vw, 110px) clamp(32px, 5vw, 60px) clamp(20px, 4vw, 40px);
+  }
+
+  .heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .number {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--text-heading-light);
+  }
+
+  .highlighted .number {
+    color: var(--text-heading-dark);
+  }
+
+  .title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.625rem, 1.329rem + 1.32vw, 2.75rem);
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--text-heading-light);
+  }
+
+  .highlighted .title {
+    color: var(--text-heading-dark);
+  }
+
+  .items {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--text-body-dark);
+  }
+
+  .items li {
+    margin-left: 24px;
+  }
+</style>

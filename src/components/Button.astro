@@ -1,0 +1,48 @@
+---
+interface Props {
+  label: string;
+  /** onLight = yellow bg for use on dark sections, onDark = dark bg for use on yellow sections */
+  variant: "onLight" | "onDark";
+}
+
+const { label, variant } = Astro.props;
+const arrow = variant === "onLight" ? "/images/arrow-on-light.svg" : "/images/arrow-on-dark.svg";
+---
+
+<button class:list={["btn", variant]} type="button">
+  <span>{label}</span>
+  <img src={arrow} alt="" width="20" height="20" />
+</button>
+
+<style>
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 51px;
+    padding: 16px 32px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .btn.onLight {
+    background: var(--bg-light);
+    color: var(--text-body-dark);
+  }
+
+  .btn.onDark {
+    background: var(--bg-dark);
+    color: var(--text-heading-light);
+    border: 1px solid var(--border-dark);
+  }
+</style>

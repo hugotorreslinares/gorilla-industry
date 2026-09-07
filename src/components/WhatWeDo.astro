@@ -1,0 +1,79 @@
+---
+import Service from "./Service.astro";
+
+const services = [
+  {
+    number: "01",
+    title: "Web Design",
+    highlighted: true,
+    items: ["Web Design & Development", "User Experience & Interface", "eCommerce", "Content Management System"],
+  },
+  { number: "02", title: "Social Media" },
+  { number: "03", title: "Motion Design" },
+  { number: "04", title: "Photo & Video" },
+  { number: "05", title: "Branding" },
+  { number: "06", title: "Print" },
+];
+---
+
+<section class="what-we-do" id="services">
+  <div class="intro">
+    <h2 class="title">What<br />we do</h2>
+    <p class="copy">
+      We are a creative design studio obsessed with the space between art and commerce. Every project begins with
+      one fundamental question: what does this brand need to feel like?
+      <br /><br />
+      We build brand systems, digital products and visual experiences for clients who understand that design is not
+      an expense — it's the product.
+    </p>
+  </div>
+  <div class="services">
+    {services.map((service) => <Service {...service} />)}
+  </div>
+</section>
+
+<style>
+  .what-we-do {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(32px, 6vw, 64px);
+    padding: clamp(48px, 8vw, 120px) clamp(20px, 5vw, 80px);
+    max-width: 1728px;
+    margin: 0 auto;
+    background: var(--bg-dark);
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 36px;
+    max-width: 446px;
+  }
+
+  .title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.5rem, 1.184rem + 5.85vw, 7.5rem);
+    line-height: 0.83;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    color: var(--text-heading-light);
+  }
+
+  .copy {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--text-body-light);
+  }
+
+  .services {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    max-width: 768px;
+  }
+</style>

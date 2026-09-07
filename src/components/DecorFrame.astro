@@ -1,0 +1,22 @@
+---
+/**
+ * Centers decorative content in a fixed 1728px reference frame (the Figma
+ * "Desktop" canvas width) so absolute-positioned children keep Figma's
+ * exact pixel coordinates regardless of the viewport's actual width.
+ */
+---
+
+<div class="decor-frame">
+  <slot />
+</div>
+
+<style>
+  .decor-frame {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 1728px;
+    margin-left: -864px;
+    pointer-events: none;
+  }
+</style>
