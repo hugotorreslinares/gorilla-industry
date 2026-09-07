@@ -2,27 +2,23 @@
 interface Props {
   number: string;
   title: string;
-  highlighted?: boolean;
-  items?: string[];
+  defaultOpen?: boolean;
+  items: string[];
 }
 
-const { number, title, highlighted = false, items } = Astro.props;
+const { number, title, defaultOpen = false, items } = Astro.props;
 ---
 
-<div class:list={["service", { highlighted }]}>
+<div class:list={["service", { open: defaultOpen }]}>
   <div class="heading">
     <span class="number">{number}</span>
     <p class="title">{title}</p>
   </div>
-  {
-    items && (
-      <ul class="items">
-        {items.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ul>
-    )
-  }
+  <ul class="items">
+    {items.map((item) => (
+      <li>{item}</li>
+    ))}
+  </ul>
 </div>
 
 <style>
@@ -30,16 +26,20 @@ const { number, title, highlighted = false, items } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
+    justify-content: space-between;
     gap: 36px;
     width: 100%;
     padding: clamp(32px, 4vw, 50px) 0 clamp(32px, 5vw, 60px);
     border-bottom: 1px solid var(--border-light);
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      padding 0.3s ease;
   }
 
-  .service.highlighted {
+  .service.open {
     background: var(--bg-light);
-    border-bottom: none;
-    justify-content: space-between;
+    border-bottom-color: transparent;
     padding: clamp(32px, 4vw, 50px) clamp(24px, 6vw, 110px) clamp(32px, 5vw, 60px) clamp(20px, 4vw, 40px);
   }
 
@@ -54,9 +54,10 @@ const { number, title, highlighted = false, items } = Astro.props;
     font-weight: 700;
     font-size: 12px;
     color: var(--text-heading-light);
+    transition: color 0.3s ease;
   }
 
-  .highlighted .number {
+  .open .number {
     color: var(--text-heading-dark);
   }
 
@@ -67,9 +68,10 @@ const { number, title, highlighted = false, items } = Astro.props;
     letter-spacing: -0.02em;
     text-transform: uppercase;
     color: var(--text-heading-light);
+    transition: color 0.3s ease;
   }
 
-  .highlighted .title {
+  .open .title {
     color: var(--text-heading-dark);
   }
 
@@ -78,10 +80,20 @@ const { number, title, highlighted = false, items } = Astro.props;
     font-size: 16px;
     line-height: 24px;
     color: var(--text-body-light);
+    margin: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition:
+      max-height 0.35s ease,
+      opacity 0.25s ease,
+      color 0.3s ease;
   }
 
-  .highlighted .items {
+  .open .items {
     color: var(--text-body-dark);
+    max-height: 160px;
+    opacity: 1;
   }
 
   .items li {

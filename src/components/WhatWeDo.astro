@@ -5,7 +5,6 @@ const services = [
   {
     number: "01",
     title: "Web Design",
-    highlighted: true,
     items: ["Web Design & Development", "User Experience & Interface", "eCommerce", "Content Management System"],
   },
   {
@@ -13,10 +12,26 @@ const services = [
     title: "Social Media",
     items: ["Social Media Strategy", "Content Creation & Design", "Community Management", "Paid Social Campaigns"],
   },
-  { number: "03", title: "Motion Design" },
-  { number: "04", title: "Photo & Video" },
-  { number: "05", title: "Branding" },
-  { number: "06", title: "Print" },
+  {
+    number: "03",
+    title: "Motion Design",
+    items: ["2D & 3D Animation", "Explainer Videos", "Motion Graphics for Social", "Brand Motion Systems"],
+  },
+  {
+    number: "04",
+    title: "Photo & Video",
+    items: ["Product Photography", "Brand & Lifestyle Video", "Video Editing & Post-Production", "Content Shoots"],
+  },
+  {
+    number: "05",
+    title: "Branding",
+    items: ["Brand Strategy", "Logo & Visual Identity", "Brand Guidelines", "Naming & Verbal Identity"],
+  },
+  {
+    number: "06",
+    title: "Print",
+    items: ["Packaging Design", "Editorial & Brochures", "Signage & Environmental", "Merchandise Design"],
+  },
 ];
 ---
 
@@ -32,9 +47,24 @@ const services = [
     </p>
   </div>
   <div class="services">
-    {services.map((service) => <Service {...service} />)}
+    {services.map((service, i) => <Service {...service} defaultOpen={i === 0} />)}
   </div>
 </section>
+
+<script>
+  const container = document.querySelector<HTMLElement>(".services");
+  const rows = container ? [...container.querySelectorAll<HTMLElement>(".service")] : [];
+
+  container?.addEventListener("pointerover", (event) => {
+    const row = (event.target as HTMLElement).closest(".service");
+    if (!row) return;
+    rows.forEach((el) => el.classList.toggle("open", el === row));
+  });
+
+  container?.addEventListener("pointerleave", () => {
+    rows.forEach((el, i) => el.classList.toggle("open", i === 0));
+  });
+</script>
 
 <style>
   .what-we-do {
