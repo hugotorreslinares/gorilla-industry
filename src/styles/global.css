@@ -24,6 +24,7 @@
 
 html {
   scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
 }
 
 html,
@@ -47,6 +48,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-snap-type: none;
+    scroll-behavior: auto;
   }
 }
 
