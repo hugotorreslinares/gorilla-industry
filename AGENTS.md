@@ -25,9 +25,9 @@ Manage the background server with `astro dev stop`, `astro dev status`, and `ast
 
 ## Deployment
 
-GitHub: [github.com/hugotorreslinares/gorilla-industry](https://github.com/hugotorreslinares/gorilla-industry), `main` branch.
+GitHub: [github.com/hugotorreslinares/gorilla-industry](https://github.com/hugotorreslinares/gorilla-industry), `main` branch — every push auto-deploys to Vercel.
 
-Vercel: not yet connected. `create_git_project` failed with a 403 the first time — Vercel's GitHub App is likely scoped to "selected repositories" and doesn't have access to this repo yet. Fix is on the user's side (GitHub → Settings → Installations → Vercel → add `gorilla-industry` to repository access), not something to retry blindly from this side.
+Live: **[gorilla-industry.vercel.app](https://gorilla-industry.vercel.app)** (project `gorilla-industry`, team `hugo-andres-torres-projects`). Web Analytics is enabled. No custom domain yet — canonical/OG/hreflang URLs in `Layout.astro` are all built from `Astro.url.origin` at request time rather than a hardcoded domain, specifically so attaching one later needs no code change.
 
 ## Content & i18n
 

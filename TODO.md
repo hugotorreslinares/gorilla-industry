@@ -2,9 +2,13 @@
 
 Tracking real gaps and pending decisions — not a wishlist. Check items off in the PR/commit that closes them, don't just delete the line.
 
+## Live
+
+Deployed and auto-deploying on every push to `main`: **[gorilla-industry.vercel.app](https://gorilla-industry.vercel.app)**. Vercel Web Analytics is enabled and collecting data (see DESIGN.md § "SEO" / the Analytics commit — no domain is hardcoded anywhere, canonical/OG URLs derive from the request at render time, so this'll keep working if a custom domain gets attached later).
+
 ## Blocking
 
-- [ ] **Vercel deploy connection.** `create_git_project` failed with a 403 — Vercel's GitHub App is likely scoped to "selected repositories" and doesn't have `gorilla-industry` in its list. User needs to go to [github.com/settings/installations](https://github.com/settings/installations) → Vercel → Configure → add the repo (or switch to "All repositories") → tell Claude to retry.
+_(none right now)_
 
 ## Content gaps
 
