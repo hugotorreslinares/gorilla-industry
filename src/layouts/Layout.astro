@@ -1,14 +1,17 @@
 ---
 import "../styles/global.css";
+import { useTranslations } from "../i18n/utils";
 
 interface Props {
   title?: string;
 }
 
-const { title = "Gorilla Industry — Design agency for brands that refuse to be forgettable" } = Astro.props;
+const lang = Astro.currentLocale ?? "en";
+const t = useTranslations(lang);
+const { title = t.meta.title } = Astro.props;
 ---
 
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

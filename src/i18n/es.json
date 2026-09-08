@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "Gorilla Industry — Agencia de diseño para marcas que se niegan a pasar desapercibidas"
+  },
+  "nav": {
+    "about": "NOSOTROS",
+    "services": "SERVICIOS",
+    "contact": "CONTACTO"
+  },
+  "hero": {
+    "heading": ["MARCAS QUE", "SE MUEVEN"],
+    "subtitle": "Somos Gorilla Industry, una agencia de branding y diseño digital para marcas que se niegan a pasar desapercibidas. Estrategia, identidad y motion, pensados para llamar la atención.",
+    "cta": "INICIA TU PROYECTO"
+  },
+  "scroll": "DESLIZA",
+  "about": {
+    "headline": {
+      "accentWord": "Ideas",
+      "restOfLine1": " audaces",
+      "line2": "hechas para",
+      "line3": "trascender",
+      "line4": "modas."
+    },
+    "copy": [
+      "Somos un estudio de diseño creativo obsesionado con el espacio entre el arte y el comercio. Cada proyecto comienza con una pregunta fundamental: ¿cómo debe sentirse esta marca?",
+      "Construimos sistemas de marca, productos digitales y experiencias visuales para clientes que entienden que el diseño no es un gasto: es el producto."
+    ],
+    "cta": "INICIA TU PROYECTO"
+  },
+  "whatWeDo": {
+    "title": ["Lo que", "hacemos"],
+    "copy": [
+      "Somos un estudio de diseño creativo obsesionado con el espacio entre el arte y el comercio. Cada proyecto comienza con una pregunta fundamental: ¿cómo debe sentirse esta marca?",
+      "Construimos sistemas de marca, productos digitales y experiencias visuales para clientes que entienden que el diseño no es un gasto: es el producto."
+    ],
+    "services": [
+      {
+        "number": "01",
+        "title": "Diseño Web",
+        "items": ["Diseño y Desarrollo Web", "Experiencia e Interfaz de Usuario", "eCommerce", "Sistemas de Gestión de Contenidos"]
+      },
+      {
+        "number": "02",
+        "title": "Redes Sociales",
+        "items": ["Estrategia en Redes Sociales", "Creación y Diseño de Contenido", "Gestión de Comunidades", "Campañas Pagadas en Redes"]
+      },
+      {
+        "number": "03",
+        "title": "Motion Design",
+        "items": ["Animación 2D y 3D", "Videos Explicativos", "Motion Graphics para Redes", "Sistemas de Motion de Marca"]
+      },
+      {
+        "number": "04",
+        "title": "Foto y Video",
+        "items": ["Fotografía de Producto", "Video de Marca y Lifestyle", "Edición y Postproducción de Video", "Producción de Contenido"]
+      },
+      {
+        "number": "05",
+        "title": "Branding",
+        "items": ["Estrategia de Marca", "Logo e Identidad Visual", "Manual de Marca", "Naming e Identidad Verbal"]
+      },
+      {
+        "number": "06",
+        "title": "Impresos",
+        "items": ["Diseño de Empaques", "Editorial y Brochures", "Señalética y Ambientación", "Diseño de Merchandising"]
+      }
+    ]
+  },
+  "gallery": {
+    "alts": ["Sudadera Gorilla", "Vaso de café de marca", "Camiseta Gorilla", "Mural urbano", "Bolsa tote de marca", "Póster urbano"]
+  }
+}

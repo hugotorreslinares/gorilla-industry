@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "title": "Gorilla Industry — Design agency for brands that refuse to be forgettable"
+  },
+  "nav": {
+    "about": "ABOUT",
+    "services": "SERVICES",
+    "contact": "CONTACT"
+  },
+  "hero": {
+    "heading": ["WE MAKE", "BRANDS MOVE"],
+    "subtitle": "We're Gorilla Industry — a branding and digital agency for brands that refuse to be forgettable. Strategy, identity and motion, built to turn heads.",
+    "cta": "START A PROJECT"
+  },
+  "scroll": "SCROLL",
+  "about": {
+    "headline": {
+      "accentWord": "Bold",
+      "restOfLine1": " ideas",
+      "line2": "built to",
+      "line3": "outlast",
+      "line4": "trends."
+    },
+    "copy": [
+      "We are a creative design studio obsessed with the space between art and commerce. Every project begins with one fundamental question: what does this brand need to feel like?",
+      "We build brand systems, digital products and visual experiences for clients who understand that design is not an expense — it's the product."
+    ],
+    "cta": "START A PROJECT"
+  },
+  "whatWeDo": {
+    "title": ["What", "we do"],
+    "copy": [
+      "We are a creative design studio obsessed with the space between art and commerce. Every project begins with one fundamental question: what does this brand need to feel like?",
+      "We build brand systems, digital products and visual experiences for clients who understand that design is not an expense — it's the product."
+    ],
+    "services": [
+      {
+        "number": "01",
+        "title": "Web Design",
+        "items": ["Web Design & Development", "User Experience & Interface", "eCommerce", "Content Management System"]
+      },
+      {
+        "number": "02",
+        "title": "Social Media",
+        "items": ["Social Media Strategy", "Content Creation & Design", "Community Management", "Paid Social Campaigns"]
+      },
+      {
+        "number": "03",
+        "title": "Motion Design",
+        "items": ["2D & 3D Animation", "Explainer Videos", "Motion Graphics for Social", "Brand Motion Systems"]
+      },
+      {
+        "number": "04",
+        "title": "Photo & Video",
+        "items": ["Product Photography", "Brand & Lifestyle Video", "Video Editing & Post-Production", "Content Shoots"]
+      },
+      {
+        "number": "05",
+        "title": "Branding",
+        "items": ["Brand Strategy", "Logo & Visual Identity", "Brand Guidelines", "Naming & Verbal Identity"]
+      },
+      {
+        "number": "06",
+        "title": "Print",
+        "items": ["Packaging Design", "Editorial & Brochures", "Signage & Environmental", "Merchandise Design"]
+      }
+    ]
+  },
+  "gallery": {
+    "alts": ["Gorilla hoodie", "Branded coffee cup", "Gorilla t-shirt", "Street mural", "Branded tote bag", "Street poster"]
+  }
+}

@@ -1,53 +1,21 @@
 ---
 import Service from "./Service.astro";
+import { useTranslations } from "../i18n/utils";
 
-const services = [
-  {
-    number: "01",
-    title: "Web Design",
-    items: ["Web Design & Development", "User Experience & Interface", "eCommerce", "Content Management System"],
-  },
-  {
-    number: "02",
-    title: "Social Media",
-    items: ["Social Media Strategy", "Content Creation & Design", "Community Management", "Paid Social Campaigns"],
-  },
-  {
-    number: "03",
-    title: "Motion Design",
-    items: ["2D & 3D Animation", "Explainer Videos", "Motion Graphics for Social", "Brand Motion Systems"],
-  },
-  {
-    number: "04",
-    title: "Photo & Video",
-    items: ["Product Photography", "Brand & Lifestyle Video", "Video Editing & Post-Production", "Content Shoots"],
-  },
-  {
-    number: "05",
-    title: "Branding",
-    items: ["Brand Strategy", "Logo & Visual Identity", "Brand Guidelines", "Naming & Verbal Identity"],
-  },
-  {
-    number: "06",
-    title: "Print",
-    items: ["Packaging Design", "Editorial & Brochures", "Signage & Environmental", "Merchandise Design"],
-  },
-];
+const t = useTranslations(Astro.currentLocale);
 ---
 
 <section class="what-we-do" id="services">
   <div class="intro">
-    <h2 class="title">What<br />we do</h2>
+    <h2 class="title">{t.whatWeDo.title[0]}<br />{t.whatWeDo.title[1]}</h2>
     <p class="copy">
-      We are a creative design studio obsessed with the space between art and commerce. Every project begins with
-      one fundamental question: what does this brand need to feel like?
+      {t.whatWeDo.copy[0]}
       <br /><br />
-      We build brand systems, digital products and visual experiences for clients who understand that design is not
-      an expense — it's the product.
+      {t.whatWeDo.copy[1]}
     </p>
   </div>
   <div class="services">
-    {services.map((service, i) => <Service {...service} defaultOpen={i === 0} />)}
+    {t.whatWeDo.services.map((service, i) => <Service {...service} defaultOpen={i === 0} />)}
   </div>
 </section>
 

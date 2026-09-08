@@ -1,12 +1,18 @@
 ---
-const images = [
-  { src: "/images/gorilla-hoodie.png", alt: "Gorilla hoodie" },
-  { src: "/images/coffee.png", alt: "Branded coffee cup" },
-  { src: "/images/tshirt.png", alt: "Gorilla t-shirt" },
-  { src: "/images/wall.png", alt: "Street mural" },
-  { src: "/images/totebag.png", alt: "Branded tote bag" },
-  { src: "/images/poster.png", alt: "Street poster" },
+import { useTranslations } from "../i18n/utils";
+
+const t = useTranslations(Astro.currentLocale);
+
+const sources = [
+  "/images/gorilla-hoodie.png",
+  "/images/coffee.png",
+  "/images/tshirt.png",
+  "/images/wall.png",
+  "/images/totebag.png",
+  "/images/poster.png",
 ];
+
+const images = sources.map((src, i) => ({ src, alt: t.gallery.alts[i] }));
 ---
 
 <div class="gallery">

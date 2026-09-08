@@ -1,5 +1,16 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { useTranslations } from "../i18n/utils";
+
+const lang = Astro.currentLocale ?? "en";
+const t = useTranslations(lang);
+const homeUrl = getRelativeLocaleUrl(lang, "/");
+const enUrl = getRelativeLocaleUrl("en", "/");
+const esUrl = getRelativeLocaleUrl("es", "/");
+---
+
 <header class="header">
-  <a href="/" class="logo">
+  <a href={homeUrl} class="logo">
     <img src="/images/logo.svg" alt="Gorilla Industry" width="120" height="70" />
   </a>
 
@@ -10,11 +21,13 @@
   </button>
 
   <nav class="nav" id="site-nav">
-    <a href="#about">ABOUT</a>
-    <a href="#services">SERVICES</a>
-    <a href="#contact">CONTACT</a>
+    <a href="#about">{t.nav.about}</a>
+    <a href="#services">{t.nav.services}</a>
+    <a href="#contact">{t.nav.contact}</a>
     <div class="lang">
-      <span class="active">EN</span><span> / ES</span>
+      <a href={enUrl} class:list={["lang-link", { active: lang === "en" }]}>EN</a>
+      <span> / </span>
+      <a href={esUrl} class:list={["lang-link", { active: lang === "es" }]}>ES</a>
     </div>
   </nav>
 </header>
@@ -98,7 +111,11 @@
     border-left: 2px solid var(--border-body-light);
   }
 
-  .lang .active {
+  .lang-link {
+    color: inherit;
+  }
+
+  .lang-link.active {
     font-weight: 700;
     color: var(--text-heading-light);
   }

@@ -1,6 +1,9 @@
 ---
 import Button from "./Button.astro";
 import DecorFrame from "./DecorFrame.astro";
+import { useTranslations } from "../i18n/utils";
+
+const t = useTranslations(Astro.currentLocale);
 ---
 
 <section class="about" id="about">
@@ -11,20 +14,18 @@ import DecorFrame from "./DecorFrame.astro";
 
   <div class="inner">
     <h2 class="headline">
-      <span class="dark">Bold</span><span> ideas</span><br />
-      built to<br />
-      outlast<br />
-      trends.
+      <span class="dark">{t.about.headline.accentWord}</span><span>{t.about.headline.restOfLine1}</span><br />
+      {t.about.headline.line2}<br />
+      {t.about.headline.line3}<br />
+      {t.about.headline.line4}
     </h2>
     <div class="content">
       <p class="copy">
-        We are a creative design studio obsessed with the space between art and commerce. Every project begins
-        with one fundamental question: what does this brand need to feel like?
+        {t.about.copy[0]}
         <br /><br />
-        We build brand systems, digital products and visual experiences for clients who understand that design is
-        not an expense — it's the product.
+        {t.about.copy[1]}
       </p>
-      <Button label="START A PROJECT" variant="onDark" />
+      <Button label={t.about.cta} variant="onDark" />
     </div>
   </div>
 </section>
