@@ -65,5 +65,10 @@
   },
   "gallery": {
     "alts": ["Sudadera Gorilla", "Vaso de café de marca", "Camiseta Gorilla", "Mural urbano", "Bolsa tote de marca", "Póster urbano"]
+  },
+  "cookieConsent": {
+    "message": "Usamos cookies para mejorar tu experiencia y analizar el tráfico del sitio. Al hacer clic en \"Aceptar\", aceptas el uso de cookies.",
+    "accept": "Aceptar",
+    "reject": "Rechazar"
   }
 }

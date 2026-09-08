@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { getSeo } from "../seo/utils";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import CookieConsent from "../components/CookieConsent.astro";
 
 interface Props {
   title?: string;
@@ -55,5 +56,6 @@ const esUrl = new URL(getRelativeLocaleUrl("es", "/"), Astro.url.origin).href;
   </head>
   <body>
     <slot />
+    <CookieConsent />
   </body>
 </html>

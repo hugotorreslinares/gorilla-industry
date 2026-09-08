@@ -4,8 +4,8 @@
     {
       "name": "astro-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "4330"],
-      "port": 4330
+      "runtimeArgs": ["run", "dev", "--", "--port", "4331"],
+      "port": 4331
     }
   ]
 }

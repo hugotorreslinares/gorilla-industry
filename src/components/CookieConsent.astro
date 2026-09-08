@@ -1,0 +1,123 @@
+---
+import { useTranslations } from "../i18n/utils";
+
+const t = useTranslations(Astro.currentLocale);
+---
+
+<div class="cookie-consent" id="cookie-consent" role="region" aria-label="Cookie consent">
+  <p class="message">{t.cookieConsent.message}</p>
+  <div class="actions">
+    <button class="btn-reject" type="button" id="cookie-reject">{t.cookieConsent.reject}</button>
+    <button class="btn-accept" type="button" id="cookie-accept">{t.cookieConsent.accept}</button>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = "gorilla-cookie-consent";
+  const banner = document.getElementById("cookie-consent");
+
+  function hasStoredChoice() {
+    try {
+      return Boolean(localStorage.getItem(STORAGE_KEY));
+    } catch {
+      // Storage blocked (private mode, disabled cookies, etc.) — default
+      // to showing the banner rather than failing silently either way.
+      return false;
+    }
+  }
+
+  function storeChoice(choice: "accepted" | "rejected") {
+    try {
+      localStorage.setItem(STORAGE_KEY, choice);
+    } catch {
+      // Best-effort only; if it can't persist, the banner just reappears
+      // next visit, which is an acceptable fallback.
+    }
+  }
+
+  if (banner && !hasStoredChoice()) {
+    banner.classList.add("visible");
+  }
+
+  document.getElementById("cookie-accept")?.addEventListener("click", () => {
+    storeChoice("accepted");
+    banner?.classList.remove("visible");
+  });
+
+  document.getElementById("cookie-reject")?.addEventListener("click", () => {
+    storeChoice("rejected");
+    banner?.classList.remove("visible");
+  });
+</script>
+
+<style>
+  .cookie-consent {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px clamp(20px, 4vw, 80px);
+    background: var(--bg-dark);
+    border-top: 2px solid var(--border-light);
+    transform: translateY(110%);
+    transition: transform 0.4s ease;
+    pointer-events: none;
+  }
+
+  .cookie-consent.visible {
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cookie-consent {
+      transition: none;
+    }
+  }
+
+  .message {
+    flex: 1 1 320px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-body-light);
+    max-width: 720px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .btn-reject,
+  .btn-accept {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-reject {
+    background: transparent;
+    color: var(--text-body-light);
+    border: 1px solid var(--border-dark);
+  }
+
+  .btn-accept {
+    background: var(--bg-light);
+    color: var(--text-body-dark);
+    border: none;
+  }
+</style>

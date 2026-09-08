@@ -65,5 +65,10 @@
   },
   "gallery": {
     "alts": ["Gorilla hoodie", "Branded coffee cup", "Gorilla t-shirt", "Street mural", "Branded tote bag", "Street poster"]
+  },
+  "cookieConsent": {
+    "message": "We use cookies to improve your experience and analyze site traffic. By clicking \"Accept\", you agree to our use of cookies.",
+    "accept": "Accept",
+    "reject": "Reject"
   }
 }
