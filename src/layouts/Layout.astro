@@ -1,23 +1,51 @@
 ---
 import "../styles/global.css";
-import { useTranslations } from "../i18n/utils";
+import { getSeo } from "../seo/utils";
+import { getRelativeLocaleUrl } from "astro:i18n";
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
 const lang = Astro.currentLocale ?? "en";
-const t = useTranslations(lang);
-const { title = t.meta.title } = Astro.props;
+const seo = getSeo(lang);
+const { title = seo.title, description = seo.description } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).href;
+const ogImageUrl = new URL(seo.ogImage, Astro.url.origin).href;
+const enUrl = new URL(getRelativeLocaleUrl("en", "/"), Astro.url.origin).href;
+const esUrl = new URL(getRelativeLocaleUrl("es", "/"), Astro.url.origin).href;
 ---
 
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={seo.keywords} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:site_name" content={seo.siteName} />
+    <meta property="og:locale" content={seo.ogLocale} />
+
+    <meta name="twitter:card" content={seo.twitterCard} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

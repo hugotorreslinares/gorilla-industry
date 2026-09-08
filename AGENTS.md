@@ -35,6 +35,8 @@ All copy lives in `src/i18n/en.json` / `src/i18n/es.json`, not inline in compone
 
 Spanish is a first-pass translation the user hasn't reviewed yet (see TODO.md) — don't treat `es.json` as authoritative copy to build further Spanish content from without flagging that.
 
+Page-level SEO copy (title, description, keywords) is separate from the above: `src/seo/seo.json`, read by `src/seo/utils.ts`, consumed only in `Layout.astro`. See DESIGN.md § "SEO."
+
 ## Documentation
 
 Full Astro documentation: https://docs.astro.build

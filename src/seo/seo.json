@@ -1,0 +1,19 @@
+{
+  "siteName": "Gorilla Industry",
+  "ogImage": "/images/poster.png",
+  "twitterCard": "summary_large_image",
+  "locales": {
+    "en": {
+      "title": "Gorilla Industry — Design agency for brands that refuse to be forgettable",
+      "description": "Gorilla Industry is a branding and digital agency crafting bold brand identities, websites, and motion design for companies that refuse to be forgettable.",
+      "keywords": "branding agency, digital agency, brand identity, web design, motion design, social media strategy, print design",
+      "ogLocale": "en_US"
+    },
+    "es": {
+      "title": "Gorilla Industry — Agencia de diseño para marcas que se niegan a pasar desapercibidas",
+      "description": "Gorilla Industry es una agencia de branding y diseño digital que crea identidades de marca, sitios web y motion design audaces para marcas que no pasan desapercibidas.",
+      "keywords": "agencia de branding, agencia digital, identidad de marca, diseño web, motion design, estrategia de redes sociales, diseño editorial",
+      "ogLocale": "es_ES"
+    }
+  }
+}

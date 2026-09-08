@@ -21,7 +21,7 @@ Tracking real gaps and pending decisions — not a wishlist. Check items off in 
 ## Technical / launch checklist
 
 - [ ] **Run a production build** (`npm run build`) before the first real deploy — this project has only been checked via `astro dev`, never built for production.
-- [ ] **SEO basics missing**: no Open Graph / Twitter card meta tags, no `sitemap.xml`, no `robots.txt`. `Layout.astro` only sets `<title>` and a generic description-less head.
+- [x] ~~SEO basics missing~~ — title, description, keywords, canonical, hreflang alternates, Open Graph and Twitter Card tags are all in [Layout.astro](src/layouts/Layout.astro), copy sourced from [src/seo/seo.json](src/seo/seo.json) (per-locale, not hardcoded in components). Still missing: `sitemap.xml` and `robots.txt` (neither exists yet), and `og:image` points at `public/images/poster.png` — a placeholder, not a purpose-made 1200×630 social share graphic.
 - [ ] **Favicon is still the Astro scaffold default** (`public/favicon.svg`) — not a Gorilla Industry mark.
 - [ ] **Image weight**: gallery photos (`public/images/*.png`) are unoptimized PNG exports straight from Figma (tens to ~100KB each) — fine for now, but convert to `.webp`/`.avif` or route through Astro's `<Image>` before this needs to be fast.
 

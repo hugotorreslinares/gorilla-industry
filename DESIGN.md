@@ -89,6 +89,10 @@ Only the first service ("Web Design") is open by default. Hovering any other row
 
 The Figma file's own English copy ("We are a creative design studio...") was kept as-is. Actual `Lorem ipsum` placeholder blocks (hero subtitle, the big About headline, and the 5 services that had no copy) were rewritten with real agency positioning copy. All of it now lives in [src/i18n/en.json](src/i18n/en.json) (see "Internationalization" below) rather than inline in the components.
 
+## SEO
+
+Deliberately kept separate from `src/i18n/` — per-locale page metadata (title, description, keywords, OG locale) lives in [src/seo/seo.json](src/seo/seo.json), read via [src/seo/utils.ts](src/seo/utils.ts)'s `getSeo(lang)`, consumed only by [Layout.astro](src/layouts/Layout.astro). That's the one file to edit for title/description/keyword changes — no component touches SEO copy directly. `Layout.astro` renders canonical + `hreflang` alternates (`en`, `es`, `x-default`) via `astro:i18n`'s `getRelativeLocaleUrl`, plus Open Graph and Twitter Card tags; both use `Astro.url.origin` for absolute URLs rather than a hardcoded domain, since none is configured yet (see TODO.md — Vercel isn't connected). `og:image`/`twitter:image` point at `public/images/poster.png` as a placeholder — swap for a real 1200×630 share graphic before launch.
+
 ## Verifying changes in this environment
 
 The Claude Code browser preview pane runs the tab in a backgrounded/hidden state most of the time. Three known artifacts to not mistake for real bugs:
