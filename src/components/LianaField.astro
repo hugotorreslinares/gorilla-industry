@@ -18,7 +18,7 @@ interface Props {
   vineCount?: number;
 }
 
-const { top = -100, width = 1728, height = 650, vineCount = 14 } = Astro.props;
+const { top = -100, width = 1728, height = 650, vineCount = 7 } = Astro.props;
 ---
 
 <canvas class="liana-field" aria-hidden="true" style={`top:${top}px; width:${width}px; height:${height}px`}></canvas>
@@ -189,17 +189,22 @@ const { top = -100, width = 1728, height = 650, vineCount = 14 } = Astro.props;
 
     function initVines() {
       vines = [];
-      let uShapeCount = 0;
       const margin = width * 0.04;
+
+      // About half arch between two anchors (U-shape) instead of just
+      // hanging straight down — a handful of identical top-anchored
+      // strands reads as string lights, not tangled vines.
+      const targetUShapeCount = Math.round(vineCount / 2);
+      const indices = Array.from({ length: vineCount }, (_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const uShapeIndices = new Set(indices.slice(0, targetUShapeCount));
 
       for (let i = 0; i < vineCount; i++) {
         const startX = margin + Math.random() * (width - margin * 2);
-        let makeUShape = false;
-        if ((uShapeCount < 2 && Math.random() > 0.6) || (i === vineCount - 1 && uShapeCount < 2)) {
-          makeUShape = true;
-          uShapeCount++;
-        }
-        vines.push(new Vine(startX, makeUShape));
+        vines.push(new Vine(startX, uShapeIndices.has(i)));
       }
     }
 
