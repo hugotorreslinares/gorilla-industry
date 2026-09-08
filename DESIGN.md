@@ -63,15 +63,23 @@ No Figma reference below 1728px, so these are our own calls:
 
 `html { scroll-snap-type: y proximity }` (global.css) with `scroll-snap-align: start` on `#hero`, `#about`, `#services`, `.gallery`. `proximity` (not `mandatory`) so it doesn't fight the user on a long section like the gallery. `scroll-margin-top: var(--header-height, 104px)` on each target so a snapped section doesn't end up hidden under the sticky header. Disabled under `prefers-reduced-motion: reduce`.
 
-## Liana hover animation
+## Liana physics (desktop only)
 
-Each of the 3 lianas swings on hover with a **different** keyframe animation so they don't read as one repeated effect:
+The 3 lianas used to be static SVGs with a discrete CSS `@keyframes` sway triggered on `pointerenter`. They're now a small Verlet rope simulation on a `<canvas>` in [Hero.astro](src/components/Hero.astro), anchored at the top, falling under gravity, constrained to a fixed segment length, and bent by the mouse's recent velocity within a 110px radius — continuous and reactive instead of a fixed one-shot animation.
 
-- `liana-sway-1` (big vine) — pure rotation pendulum around its tilted base angle (-6.44deg), slowest (1.4s).
-- `liana-sway-2` (thin vine) — rotation + `translateX` "whip" with more oscillation steps, fastest (0.8s).
-- `liana-sway-3` (bushy vine) — rotation + `scaleY` "bounce" for a heavier feel, mid speed (1.3s).
+Only runs on desktop (`>=1200px`, gated with `matchMedia`, not just a CSS breakpoint — the JS needs to know before starting the rAF loop) and only outside `prefers-reduced-motion`. Below 1200px, or under reduced motion, the original static liana SVGs render instead (`.liana-static`) — no canvas, no animation loop, so there's no JS cost on touch/smaller screens where a hover effect can't be felt anyway. The loop also pauses on `visibilitychange` when the tab is backgrounded.
 
-Triggered via JS (`pointerenter` adds `.is-swaying`, `animationend` removes it) rather than pure CSS `:hover`, so a quick mouse-past still plays the full settle animation instead of cutting off. All respect `prefers-reduced-motion`.
+**Gotcha hit once:** an early version added a continuous ambient "wind" sine force so the ropes wouldn't rest perfectly straight and vertical (physically correct but visually static without pointer input). That force was added as a raw per-frame position delta rather than being integrated properly, and destabilized the 5-pass distance-constraint solver over a few hundred frames — the ropes visibly collapsed/bunched up well short of their real length instead of hanging fully extended. Caught it by sampling `canvas.getImageData` for ink at increasing `y` values rather than trusting a single screenshot (which only showed the top ~340px and looked fine). Removed the ambient force; kept a one-time random spawn jitter per point instead, which doesn't touch the ongoing integration and is enough to avoid perfectly identical dead-straight ropes at rest.
+
+## Internationalization
+
+English (default, served at `/`) and Spanish (`/es/`) via Astro's native i18n routing (`astro.config.mjs`: `i18n.defaultLocale: 'en'`, `locales: ['en','es']`, `routing.prefixDefaultLocale: false`). All copy lives in [src/i18n/en.json](src/i18n/en.json) and [src/i18n/es.json](src/i18n/es.json) — same shape in both files. [src/i18n/utils.ts](src/i18n/utils.ts) exports `useTranslations(lang)`; every component that renders text calls `useTranslations(Astro.currentLocale)` itself rather than receiving strings as props, so adding a new locale-aware component is just importing that helper, no prop-drilling through parents.
+
+Two page trees mirror each other: [src/pages/index.astro](src/pages/index.astro) (English) and [src/pages/es/index.astro](src/pages/es/index.astro) (Spanish) render the identical component tree — Astro infers `Astro.currentLocale` from which one matched. The header's language switcher uses `getRelativeLocaleUrl()` from `astro:i18n` rather than hardcoded `/es/` paths.
+
+**Adding a new UI string**: add the key to both JSON files (same path/shape in each) before using it in a component — there's no fallback-to-English for a missing Spanish key at the field level, `useTranslations` only falls back to English if the *whole locale* is unrecognized.
+
+**Spanish copy is a first-pass translation, not yet reviewed** — see TODO.md.
 
 ## Services — hover accordion
 
@@ -79,7 +87,7 @@ Only the first service ("Web Design") is open by default. Hovering any other row
 
 ## Content
 
-The Figma file's own English copy ("We are a creative design studio...") was kept as-is. Actual `Lorem ipsum` placeholder blocks (hero subtitle, the big About headline, and the 5 services that had no copy) were rewritten with real agency positioning copy — see git history on `Hero.astro`, `About.astro`, `WhatWeDo.astro` for the exact wording if it needs revisiting.
+The Figma file's own English copy ("We are a creative design studio...") was kept as-is. Actual `Lorem ipsum` placeholder blocks (hero subtitle, the big About headline, and the 5 services that had no copy) were rewritten with real agency positioning copy. All of it now lives in [src/i18n/en.json](src/i18n/en.json) (see "Internationalization" below) rather than inline in the components.
 
 ## Verifying changes in this environment
 

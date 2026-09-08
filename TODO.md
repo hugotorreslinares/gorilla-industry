@@ -9,8 +9,8 @@ Tracking real gaps and pending decisions — not a wishlist. Check items off in 
 ## Content gaps
 
 - [ ] **Dead `#contact` link.** [Header.astro:15](src/components/Header.astro:15) links to `#contact` but no section on the page has `id="contact"` — clicking it does nothing. Either build a real contact section/form, or point it somewhere real (email link, a `/contact` page).
-- [ ] **Duplicated body copy.** The "We are a creative design studio obsessed with..." paragraph is copy-pasted verbatim in both [About.astro](src/components/About.astro:20) and [WhatWeDo.astro](src/components/WhatWeDo.astro:42). Fine as a placeholder, but should be two distinct paragraphs before this ships for real.
-- [ ] **EN / ES toggle is decorative.** [Header.astro](src/components/Header.astro) renders the language switcher but there's no i18n routing behind it — clicking "ES" does nothing.
+- [ ] **Duplicated body copy.** The "We are a creative design studio obsessed with..." paragraph is copy-pasted verbatim in both `about.copy` and `whatWeDo.copy` in [en.json](src/i18n/en.json) / [es.json](src/i18n/es.json). Fine as a placeholder, but should be two distinct paragraphs before this ships for real.
+- [ ] **Spanish translations need human review.** [es.json](src/i18n/es.json) is a first-pass translation written by Claude, not checked by a native/professional translator yet — user explicitly asked to review it before it ships. Don't treat it as final copy.
 - [ ] **No footer.** The Figma "Desktop" frame declares a 5608px canvas but has no designed content below the gallery (~y:4466) — nothing to port, but a real site needs a footer (contact info, socials, legal, sitemap links) before launch.
 
 ## Design gaps (no Figma reference existed for these — see [DESIGN.md](DESIGN.md))
