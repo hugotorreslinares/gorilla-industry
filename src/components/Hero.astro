@@ -49,13 +49,14 @@ const t = useTranslations(Astro.currentLocale);
     const CANVAS_HEIGHT = 650;
 
     const CONFIG = {
-      gravity: 0.15,
-      friction: 0.96,
-      bounceDistance: 110,
+      gravity: 0.18,
+      friction: 0.95,
+      bounceDistance: 130,
+      leafColor: "#4a5d32",
       ropes: [
-        { xFraction: 0.186, points: 16, spacing: 34, width: 5, hue: 80 },
-        { xFraction: 0.523, points: 13, spacing: 30, width: 2.5, hue: 95 },
-        { xFraction: 0.873, points: 15, spacing: 32, width: 3.5, hue: 70 },
+        { xFraction: 0.186, points: 16, spacing: 34, width: 5, toneRange: [30, 45] as [number, number] },
+        { xFraction: 0.523, points: 13, spacing: 30, width: 2.5, toneRange: [22, 34] as [number, number] },
+        { xFraction: 0.873, points: 15, spacing: 32, width: 3.5, toneRange: [26, 40] as [number, number] },
       ],
     };
 
@@ -66,22 +67,46 @@ const t = useTranslations(Astro.currentLocale);
       oldY: number;
     }
 
+    interface Branch {
+      pointIndex: number;
+      side: 1 | -1;
+      length: number;
+      angleOffset: number;
+    }
+
     class Rope {
       points: Point[] = [];
+      branches: Branch[] = [];
       spacing: number;
       width: number;
       color: string;
 
-      constructor(startX: number, count: number, spacing: number, width: number, hue: number) {
+      constructor(startX: number, count: number, spacing: number, width: number, toneRange: [number, number]) {
         this.spacing = spacing;
         this.width = width;
-        this.color = `hsl(${hue}, 22%, 30%)`;
+        // Warm bark/vine brown, matching the reference sim's palette.
+        const tone = toneRange[0] + Math.random() * (toneRange[1] - toneRange[0]);
+        this.color = `rgb(${tone + 15}, ${tone}, 12)`;
+
         for (let i = 0; i < count; i++) {
           // A little random jitter so the rope doesn't rest as a
           // mathematically perfect straight line — real vines never do.
           const jitter = i === 0 ? 0 : (Math.random() - 0.5) * 10;
           const x = startX + jitter;
           this.points.push({ x, y: i * spacing, oldX: x, oldY: i * spacing });
+        }
+
+        // Small side shoots with a leaf-bud tip along the vine's length —
+        // this is what reads as "organic" instead of a bare rope.
+        for (let i = 2; i < count - 2; i++) {
+          if (Math.random() > 0.55) {
+            this.branches.push({
+              pointIndex: i,
+              side: Math.random() > 0.5 ? 1 : -1,
+              length: (10 + Math.random() * 20) * (width / 3.5),
+              angleOffset: Math.random() * 0.4 + 0.2,
+            });
+          }
         }
       }
 
@@ -103,13 +128,13 @@ const t = useTranslations(Astro.currentLocale);
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < CONFIG.bounceDistance) {
               const force = (CONFIG.bounceDistance - dist) / CONFIG.bounceDistance;
-              p.x += mouseVX * force * 0.5;
-              p.y += mouseVY * force * 0.5;
+              p.x += mouseVX * force * 0.45;
+              p.y += mouseVY * force * 0.45;
             }
           }
         });
 
-        for (let pass = 0; pass < 5; pass++) {
+        for (let pass = 0; pass < 6; pass++) {
           for (let i = 0; i < this.points.length - 1; i++) {
             const p1 = this.points[i];
             const p2 = this.points[i + 1];
@@ -135,6 +160,35 @@ const t = useTranslations(Astro.currentLocale);
       }
 
       draw(context: CanvasRenderingContext2D) {
+        context.shadowBlur = 8;
+        context.shadowColor = "rgba(0, 0, 0, 0.5)";
+        context.shadowOffsetX = 3;
+        context.shadowOffsetY = 3;
+
+        this.branches.forEach((b) => {
+          const current = this.points[b.pointIndex];
+          const next = this.points[b.pointIndex + 1];
+          const baseAngle = Math.atan2(next.y - current.y, next.x - current.x);
+          const branchAngle = baseAngle + b.angleOffset * b.side;
+          const tipX = current.x + Math.cos(branchAngle) * b.length;
+          const tipY = current.y + Math.sin(branchAngle) * b.length;
+          const ctrlX = current.x + Math.cos(branchAngle - 0.2 * b.side) * (b.length * 0.5);
+          const ctrlY = current.y + Math.sin(branchAngle - 0.2 * b.side) * (b.length * 0.5);
+
+          context.beginPath();
+          context.moveTo(current.x, current.y);
+          context.quadraticCurveTo(ctrlX, ctrlY, tipX, tipY);
+          context.strokeStyle = this.color;
+          context.lineWidth = this.width * 0.4;
+          context.lineCap = "round";
+          context.stroke();
+
+          context.beginPath();
+          context.arc(tipX, tipY, this.width * 0.5, 0, Math.PI * 2);
+          context.fillStyle = CONFIG.leafColor;
+          context.fill();
+        });
+
         context.beginPath();
         context.moveTo(this.points[0].x, this.points[0].y);
         for (let i = 1; i < this.points.length - 1; i++) {
@@ -147,7 +201,12 @@ const t = useTranslations(Astro.currentLocale);
         context.strokeStyle = this.color;
         context.lineWidth = this.width;
         context.lineCap = "round";
+        context.lineJoin = "round";
         context.stroke();
+
+        context.shadowBlur = 0;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
       }
     }
 
@@ -157,7 +216,9 @@ const t = useTranslations(Astro.currentLocale);
     const mouse = { x: null as number | null, y: null as number | null, vx: 0, vy: 0, lastX: 0, lastY: 0 };
 
     function buildRopes() {
-      ropes = CONFIG.ropes.map((r) => new Rope(r.xFraction * REFERENCE_WIDTH, r.points, r.spacing, r.width, r.hue));
+      ropes = CONFIG.ropes.map(
+        (r) => new Rope(r.xFraction * REFERENCE_WIDTH, r.points, r.spacing, r.width, r.toneRange)
+      );
     }
 
     function resize() {
