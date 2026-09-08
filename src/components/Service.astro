@@ -102,15 +102,17 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     margin: 0;
     overflow: hidden;
     opacity: 0;
+    transform: translateY(-6px);
     transition:
-      opacity calc(var(--duration) * 0.6) var(--ease),
+      opacity var(--duration) var(--ease),
+      transform var(--duration) var(--ease),
       color var(--duration) var(--ease);
   }
 
   .open .items {
     color: var(--text-body-dark);
     opacity: 1;
-    transition-delay: calc(var(--duration) * 0.15), 0s;
+    transform: translateY(0);
   }
 
   .items li {
