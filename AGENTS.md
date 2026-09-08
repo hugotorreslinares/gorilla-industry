@@ -5,8 +5,9 @@ Gorilla Industry ("GRL") — a marketing/branding agency landing page, built in 
 ## Stack & conventions
 
 - Astro, no framework islands, no Tailwind — plain scoped `<style>` per component.
-- Section components live in `src/components/`, one file per Figma section (`Hero`, `About`, `WhatWeDo`, `Gallery`, `Header`), plus small reusable pieces (`Button`, `Service`, `ScrollIndicator`, `DecorFrame`).
+- Section components live in `src/components/`, one file per Figma section (`Hero`, `About`, `WhatWeDo`, `Gallery`, `Header`), plus small reusable pieces (`Button`, `Service`, `ScrollIndicator`, `DecorFrame`, `LianaField`).
 - `DecorFrame.astro` is the shared pattern for anything positioned with Figma's raw pixel coordinates (decorative backgrounds bled outside the normal content flow) — reuse it rather than re-deriving the fixed-1728px-centered-frame math per component. See DESIGN.md § "Decorative layers pinned to the Figma frame."
+- `LianaField.astro` is a standalone, prop-configurable canvas vine simulation (not Figma-specific) — reuse it if another section wants the same hanging-vine effect rather than copying the physics code. See DESIGN.md § "Liana physics."
 - Colors, fonts and the header-height offset are CSS custom properties in `src/styles/global.css` — don't hardcode hex values in components.
 - Images live in `public/images/`, downloaded once from Figma's asset export (those URLs expire in ~7 days, so re-fetching from Figma is not an option if a file goes missing — check git history instead).
 

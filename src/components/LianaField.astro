@@ -1,0 +1,289 @@
+---
+/**
+ * A field of physics-simulated hanging/arched vines on a canvas — Verlet
+ * integration, gravity, distance constraints, mouse-reactive. Some vines
+ * anchor only at the top (hang straight down); some anchor at both ends
+ * (an inverted-arch "U" shape), so it reads as a real curtain of vines
+ * instead of a few identical straight lines.
+ *
+ * Desktop-only: hidden below 1200px and under prefers-reduced-motion —
+ * the parent is expected to show a static fallback there instead (see
+ * Hero.astro and DESIGN.md). Self-contained and reusable elsewhere: it
+ * just needs a `position: relative` ancestor to sit in.
+ */
+interface Props {
+  top?: number;
+  width?: number;
+  height?: number;
+  vineCount?: number;
+}
+
+const { top = -100, width = 1728, height = 650, vineCount = 14 } = Astro.props;
+---
+
+<canvas class="liana-field" aria-hidden="true" style={`top:${top}px; width:${width}px; height:${height}px`}></canvas>
+
+<script define:vars={{ width, height, vineCount }}>
+  const canvas = document.querySelector(".liana-field:not([data-liana-ready])");
+  if (canvas) {
+    canvas.dataset.lianaReady = "true";
+
+    const desktopQuery = window.matchMedia("(min-width: 1200px)");
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const ctx = canvas.getContext("2d");
+
+    const CONFIG = {
+      pointsPerVine: 20,
+      gravity: 0.18,
+      friction: 0.95,
+      interactionRadius: 130,
+    };
+
+    class Vine {
+      constructor(startX, isUshape) {
+        this.points = [];
+        this.branches = [];
+        this.isUshape = isUshape;
+
+        const endX = startX + width * (0.15 + Math.random() * 0.15);
+        const length = height * (isUshape ? 0.6 + Math.random() * 0.4 : 0.45 + Math.random() * 0.4);
+        this.spacing = length / (CONFIG.pointsPerVine - 1);
+
+        const tone = 20 + Math.random() * 15;
+        this.color = `rgb(${tone + 15}, ${tone}, 12)`;
+        this.thickness = 3 + Math.random() * 5;
+
+        for (let i = 0; i < CONFIG.pointsPerVine; i++) {
+          if (isUshape) {
+            const t = i / (CONFIG.pointsPerVine - 1);
+            const x = startX + (endX - startX) * t;
+            const y = Math.sin(t * Math.PI) * (length * 0.4);
+            this.points.push({ x, y, oldX: x, oldY: y });
+          } else {
+            const x = startX;
+            const y = i * this.spacing;
+            this.points.push({ x, y, oldX: x, oldY: y });
+          }
+        }
+
+        for (let i = 3; i < CONFIG.pointsPerVine - 3; i++) {
+          if (Math.random() > 0.5) {
+            this.branches.push({
+              pointIndex: i,
+              side: Math.random() > 0.5 ? 1 : -1,
+              length: 12 + Math.random() * 22,
+              angleOffset: (Math.random() * 0.4 + 0.2) * Math.PI,
+            });
+          }
+        }
+      }
+
+      update(mouseX, mouseY, mouseVX, mouseVY) {
+        this.points.forEach((p, index) => {
+          if (index === 0) return;
+          if (this.isUshape && index === this.points.length - 1) return;
+
+          const vx = (p.x - p.oldX) * CONFIG.friction;
+          const vy = (p.y - p.oldY) * CONFIG.friction;
+          p.oldX = p.x;
+          p.oldY = p.y;
+
+          p.x += vx;
+          p.y += vy + CONFIG.gravity;
+
+          if (mouseX !== null && mouseY !== null) {
+            const dx = p.x - mouseX;
+            const dy = p.y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONFIG.interactionRadius) {
+              const force = (CONFIG.interactionRadius - dist) / CONFIG.interactionRadius;
+              p.x += mouseVX * force * 0.45;
+              p.y += mouseVY * force * 0.45;
+            }
+          }
+        });
+
+        for (let pass = 0; pass < 6; pass++) {
+          for (let i = 0; i < this.points.length - 1; i++) {
+            const p1 = this.points[i];
+            const p2 = this.points[i + 1];
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const error = this.spacing - dist;
+            const percent = error / dist / 2;
+            const offsetX = dx * percent;
+            const offsetY = dy * percent;
+
+            if (i === 0) {
+              p2.x += offsetX * 2;
+              p2.y += offsetY * 2;
+            } else if (this.isUshape && i === this.points.length - 2) {
+              p1.x -= offsetX * 2;
+              p1.y -= offsetY * 2;
+            } else {
+              p1.x -= offsetX;
+              p1.y -= offsetY;
+              p2.x += offsetX;
+              p2.y += offsetY;
+            }
+          }
+        }
+      }
+
+      draw(context) {
+        context.shadowBlur = 10;
+        context.shadowColor = "rgba(0, 0, 0, 0.65)";
+        context.shadowOffsetX = 5;
+        context.shadowOffsetY = 5;
+
+        this.branches.forEach((b) => {
+          const current = this.points[b.pointIndex];
+          const next = this.points[b.pointIndex + 1];
+          const baseAngle = Math.atan2(next.y - current.y, next.x - current.x);
+          const branchAngle = baseAngle + b.angleOffset * b.side;
+          const tipX = current.x + Math.cos(branchAngle) * b.length;
+          const tipY = current.y + Math.sin(branchAngle) * b.length;
+          const ctrlX = current.x + Math.cos(branchAngle - 0.2 * b.side) * (b.length * 0.5);
+          const ctrlY = current.y + Math.sin(branchAngle - 0.2 * b.side) * (b.length * 0.5);
+
+          context.beginPath();
+          context.moveTo(current.x, current.y);
+          context.quadraticCurveTo(ctrlX, ctrlY, tipX, tipY);
+          context.strokeStyle = this.color;
+          context.lineWidth = this.thickness * 0.4;
+          context.lineCap = "round";
+          context.stroke();
+
+          context.beginPath();
+          context.arc(tipX, tipY, this.thickness * 0.5, 0, Math.PI * 2);
+          context.fillStyle = "#4a5d32";
+          context.fill();
+        });
+
+        context.beginPath();
+        context.moveTo(this.points[0].x, this.points[0].y);
+        for (let i = 1; i < this.points.length - 1; i++) {
+          const xc = (this.points[i].x + this.points[i + 1].x) / 2;
+          const yc = (this.points[i].y + this.points[i + 1].y) / 2;
+          context.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
+        }
+        const last = this.points[this.points.length - 1];
+        context.lineTo(last.x, last.y);
+        context.strokeStyle = this.color;
+        context.lineWidth = this.thickness;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.stroke();
+
+        context.shadowBlur = 0;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+      }
+    }
+
+    let vines = [];
+    let scale = 1;
+    let rafId = 0;
+    const mouse = { x: null, y: null, vx: 0, vy: 0, lastX: 0, lastY: 0 };
+
+    function initVines() {
+      vines = [];
+      let uShapeCount = 0;
+      const margin = width * 0.04;
+
+      for (let i = 0; i < vineCount; i++) {
+        const startX = margin + Math.random() * (width - margin * 2);
+        let makeUShape = false;
+        if ((uShapeCount < 2 && Math.random() > 0.6) || (i === vineCount - 1 && uShapeCount < 2)) {
+          makeUShape = true;
+          uShapeCount++;
+        }
+        vines.push(new Vine(startX, makeUShape));
+      }
+    }
+
+    function setupCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      scale = canvas.getBoundingClientRect().width / width;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function onPointerMove(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / scale;
+      const y = (event.clientY - rect.top) / scale;
+      mouse.vx = x - mouse.lastX;
+      mouse.vy = y - mouse.lastY;
+      mouse.x = x;
+      mouse.y = y;
+      mouse.lastX = x;
+      mouse.lastY = y;
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, width, height);
+      vines.forEach((vine) => {
+        vine.update(mouse.x, mouse.y, mouse.vx, mouse.vy);
+        vine.draw(ctx);
+      });
+      mouse.vx *= 0.85;
+      mouse.vy *= 0.85;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (rafId) return;
+      initVines();
+      setupCanvas();
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("resize", setupCanvas);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("resize", setupCanvas);
+    }
+
+    function sync() {
+      if (desktopQuery.matches && !reducedMotionQuery.matches) start();
+      else stop();
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stop();
+      else sync();
+    });
+
+    desktopQuery.addEventListener("change", sync);
+    reducedMotionQuery.addEventListener("change", sync);
+    sync();
+  }
+</script>
+
+<style>
+  .liana-field {
+    display: none;
+    position: absolute;
+    left: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+
+  @media (min-width: 1200px) {
+    .liana-field {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1200px) and (prefers-reduced-motion: reduce) {
+    .liana-field {
+      display: none;
+    }
+  }
+</style>

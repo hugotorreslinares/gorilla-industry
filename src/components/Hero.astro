@@ -2,6 +2,7 @@
 import Button from "./Button.astro";
 import ScrollIndicator from "./ScrollIndicator.astro";
 import DecorFrame from "./DecorFrame.astro";
+import LianaField from "./LianaField.astro";
 import { useTranslations } from "../i18n/utils";
 
 const t = useTranslations(Astro.currentLocale);
@@ -11,7 +12,7 @@ const t = useTranslations(Astro.currentLocale);
   <DecorFrame>
     <img class="doodle" src="/images/hero-doodle.svg" alt="" aria-hidden="true" />
 
-    <canvas class="liana-canvas" aria-hidden="true"></canvas>
+    <LianaField />
 
     <div class="liana liana-static liana-1" aria-hidden="true">
       <div class="liana-1-rotate">
@@ -33,261 +34,6 @@ const t = useTranslations(Astro.currentLocale);
   <ScrollIndicator />
 </section>
 
-<script>
-  // Verlet-integrated hanging ropes on a canvas, standing in for the 3
-  // liana SVGs on large desktop screens only. Below 1200px (and under
-  // prefers-reduced-motion) the static SVGs stay untouched instead —
-  // see the CSS below and DESIGN.md.
-  const canvas = document.querySelector<HTMLCanvasElement>(".liana-canvas");
-  const desktopQuery = window.matchMedia("(min-width: 1200px)");
-  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  if (canvas) {
-    const ctx = canvas.getContext("2d")!;
-
-    const REFERENCE_WIDTH = 1728;
-    const CANVAS_HEIGHT = 650;
-
-    const CONFIG = {
-      gravity: 0.18,
-      friction: 0.95,
-      bounceDistance: 130,
-      leafColor: "#4a5d32",
-      ropes: [
-        { xFraction: 0.186, points: 16, spacing: 34, width: 5, toneRange: [30, 45] as [number, number] },
-        { xFraction: 0.523, points: 13, spacing: 30, width: 2.5, toneRange: [22, 34] as [number, number] },
-        { xFraction: 0.873, points: 15, spacing: 32, width: 3.5, toneRange: [26, 40] as [number, number] },
-      ],
-    };
-
-    interface Point {
-      x: number;
-      y: number;
-      oldX: number;
-      oldY: number;
-    }
-
-    interface Branch {
-      pointIndex: number;
-      side: 1 | -1;
-      length: number;
-      angleOffset: number;
-    }
-
-    class Rope {
-      points: Point[] = [];
-      branches: Branch[] = [];
-      spacing: number;
-      width: number;
-      color: string;
-
-      constructor(startX: number, count: number, spacing: number, width: number, toneRange: [number, number]) {
-        this.spacing = spacing;
-        this.width = width;
-        // Warm bark/vine brown, matching the reference sim's palette.
-        const tone = toneRange[0] + Math.random() * (toneRange[1] - toneRange[0]);
-        this.color = `rgb(${tone + 15}, ${tone}, 12)`;
-
-        for (let i = 0; i < count; i++) {
-          // A little random jitter so the rope doesn't rest as a
-          // mathematically perfect straight line — real vines never do.
-          const jitter = i === 0 ? 0 : (Math.random() - 0.5) * 10;
-          const x = startX + jitter;
-          this.points.push({ x, y: i * spacing, oldX: x, oldY: i * spacing });
-        }
-
-        // Small side shoots with a leaf-bud tip along the vine's length —
-        // this is what reads as "organic" instead of a bare rope.
-        for (let i = 2; i < count - 2; i++) {
-          if (Math.random() > 0.55) {
-            this.branches.push({
-              pointIndex: i,
-              side: Math.random() > 0.5 ? 1 : -1,
-              length: (10 + Math.random() * 20) * (width / 3.5),
-              angleOffset: Math.random() * 0.4 + 0.2,
-            });
-          }
-        }
-      }
-
-      update(mouseX: number | null, mouseY: number | null, mouseVX: number, mouseVY: number) {
-        this.points.forEach((p, index) => {
-          if (index === 0) return; // anchored at the top
-
-          const vx = (p.x - p.oldX) * CONFIG.friction;
-          const vy = (p.y - p.oldY) * CONFIG.friction;
-          p.oldX = p.x;
-          p.oldY = p.y;
-
-          p.x += vx;
-          p.y += vy + CONFIG.gravity;
-
-          if (mouseX !== null && mouseY !== null) {
-            const dx = p.x - mouseX;
-            const dy = p.y - mouseY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < CONFIG.bounceDistance) {
-              const force = (CONFIG.bounceDistance - dist) / CONFIG.bounceDistance;
-              p.x += mouseVX * force * 0.45;
-              p.y += mouseVY * force * 0.45;
-            }
-          }
-        });
-
-        for (let pass = 0; pass < 6; pass++) {
-          for (let i = 0; i < this.points.length - 1; i++) {
-            const p1 = this.points[i];
-            const p2 = this.points[i + 1];
-            const dx = p2.x - p1.x;
-            const dy = p2.y - p1.y;
-            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-            const error = this.spacing - dist;
-            const percent = error / dist / 2;
-            const offsetX = dx * percent;
-            const offsetY = dy * percent;
-
-            if (i === 0) {
-              p2.x += offsetX * 2;
-              p2.y += offsetY * 2;
-            } else {
-              p1.x -= offsetX;
-              p1.y -= offsetY;
-              p2.x += offsetX;
-              p2.y += offsetY;
-            }
-          }
-        }
-      }
-
-      draw(context: CanvasRenderingContext2D) {
-        context.shadowBlur = 8;
-        context.shadowColor = "rgba(0, 0, 0, 0.5)";
-        context.shadowOffsetX = 3;
-        context.shadowOffsetY = 3;
-
-        this.branches.forEach((b) => {
-          const current = this.points[b.pointIndex];
-          const next = this.points[b.pointIndex + 1];
-          const baseAngle = Math.atan2(next.y - current.y, next.x - current.x);
-          const branchAngle = baseAngle + b.angleOffset * b.side;
-          const tipX = current.x + Math.cos(branchAngle) * b.length;
-          const tipY = current.y + Math.sin(branchAngle) * b.length;
-          const ctrlX = current.x + Math.cos(branchAngle - 0.2 * b.side) * (b.length * 0.5);
-          const ctrlY = current.y + Math.sin(branchAngle - 0.2 * b.side) * (b.length * 0.5);
-
-          context.beginPath();
-          context.moveTo(current.x, current.y);
-          context.quadraticCurveTo(ctrlX, ctrlY, tipX, tipY);
-          context.strokeStyle = this.color;
-          context.lineWidth = this.width * 0.4;
-          context.lineCap = "round";
-          context.stroke();
-
-          context.beginPath();
-          context.arc(tipX, tipY, this.width * 0.5, 0, Math.PI * 2);
-          context.fillStyle = CONFIG.leafColor;
-          context.fill();
-        });
-
-        context.beginPath();
-        context.moveTo(this.points[0].x, this.points[0].y);
-        for (let i = 1; i < this.points.length - 1; i++) {
-          const xc = (this.points[i].x + this.points[i + 1].x) / 2;
-          const yc = (this.points[i].y + this.points[i + 1].y) / 2;
-          context.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
-        }
-        const last = this.points[this.points.length - 1];
-        context.lineTo(last.x, last.y);
-        context.strokeStyle = this.color;
-        context.lineWidth = this.width;
-        context.lineCap = "round";
-        context.lineJoin = "round";
-        context.stroke();
-
-        context.shadowBlur = 0;
-        context.shadowOffsetX = 0;
-        context.shadowOffsetY = 0;
-      }
-    }
-
-    let ropes: Rope[] = [];
-    let scale = 1;
-    let rafId = 0;
-    const mouse = { x: null as number | null, y: null as number | null, vx: 0, vy: 0, lastX: 0, lastY: 0 };
-
-    function buildRopes() {
-      ropes = CONFIG.ropes.map(
-        (r) => new Rope(r.xFraction * REFERENCE_WIDTH, r.points, r.spacing, r.width, r.toneRange)
-      );
-    }
-
-    function resize() {
-      const rect = canvas!.getBoundingClientRect();
-      scale = rect.width / REFERENCE_WIDTH;
-      const dpr = window.devicePixelRatio || 1;
-      canvas!.width = REFERENCE_WIDTH * dpr;
-      canvas!.height = CANVAS_HEIGHT * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function onPointerMove(event: PointerEvent) {
-      const rect = canvas!.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / scale;
-      const y = (event.clientY - rect.top) / scale;
-      mouse.vx = x - mouse.lastX;
-      mouse.vy = y - mouse.lastY;
-      mouse.x = x;
-      mouse.y = y;
-      mouse.lastX = x;
-      mouse.lastY = y;
-    }
-
-    function tick() {
-      ctx.clearRect(0, 0, REFERENCE_WIDTH, CANVAS_HEIGHT);
-      ropes.forEach((rope) => {
-        rope.update(mouse.x, mouse.y, mouse.vx, mouse.vy);
-        rope.draw(ctx);
-      });
-      mouse.vx *= 0.9;
-      mouse.vy *= 0.9;
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function start() {
-      if (rafId) return;
-      buildRopes();
-      resize();
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("resize", resize);
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function stop() {
-      cancelAnimationFrame(rafId);
-      rafId = 0;
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("resize", resize);
-    }
-
-    function sync() {
-      if (desktopQuery.matches && !reducedMotionQuery.matches) {
-        start();
-      } else {
-        stop();
-      }
-    }
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stop();
-      else sync();
-    });
-
-    desktopQuery.addEventListener("change", sync);
-    reducedMotionQuery.addEventListener("change", sync);
-    sync();
-  }
-</script>
-
 <style>
   .hero {
     position: relative;
@@ -308,21 +54,9 @@ const t = useTranslations(Astro.currentLocale);
     opacity: 0.6;
   }
 
-  /* Desktop (>=1200px): the canvas rope simulation. Below that (and
-     under prefers-reduced-motion), the static SVGs render instead — see
-     the <script> above and DESIGN.md. */
-  .liana-canvas {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: -100px;
-    width: 1728px;
-    height: 650px;
-    pointer-events: none;
-  }
-
   .liana {
     position: absolute;
+    z-index: 60;
     pointer-events: none;
   }
 
@@ -371,21 +105,16 @@ const t = useTranslations(Astro.currentLocale);
     height: auto;
   }
 
+  /* Desktop (>=1200px): LianaField's own canvas simulation takes over
+     (see that component). Below that, and under prefers-reduced-motion,
+     these static SVGs stay visible instead. */
   @media (min-width: 1200px) {
-    .liana-canvas {
-      display: block;
-    }
-
     .liana-static {
       display: none;
     }
   }
 
   @media (min-width: 1200px) and (prefers-reduced-motion: reduce) {
-    .liana-canvas {
-      display: none;
-    }
-
     .liana-static {
       display: block;
     }
