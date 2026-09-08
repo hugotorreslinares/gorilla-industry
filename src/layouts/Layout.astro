@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { getSeo } from "../seo/utils";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import CookieConsent from "../components/CookieConsent.astro";
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
   title?: string;
@@ -53,6 +54,7 @@ const esUrl = new URL(getRelativeLocaleUrl("es", "/"), Astro.url.origin).href;
       href="https://fonts.googleapis.com/css2?family=Changa+One&family=Space+Mono&family=Work+Sans:wght@400;700&display=swap"
       rel="stylesheet"
     />
+    <Analytics />
   </head>
   <body>
     <slot />
