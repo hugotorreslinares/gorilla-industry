@@ -4,6 +4,7 @@ import DecorFrame from "./DecorFrame.astro";
 ---
 
 <section class="about" id="about">
+  <div class="fill" aria-hidden="true"></div>
   <DecorFrame>
     <img class="bg" src="/images/about-bg.svg" alt="" aria-hidden="true" />
   </DecorFrame>
@@ -44,8 +45,28 @@ import DecorFrame from "./DecorFrame.astro";
     max-width: none;
   }
 
+  /*
+   * about-bg.svg is rendered at its native 1816px width inside the fixed
+   * 1728px DecorFrame (see DESIGN.md) so the wave shape stays pixel-exact
+   * to Figma. That means it does NOT stretch to cover very wide viewports
+   * (~>1860px) — without this fill, the dark section background shows
+   * through on the sides past where the image ends. This solid layer
+   * starts just below the wave's lowest dip (~415px at the 1728 reference
+   * frame) and spans the full section width, so the area below the wave
+   * is always solid yellow edge-to-edge regardless of viewport width.
+   */
+  .fill {
+    position: absolute;
+    top: 420px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-light);
+  }
+
   @media (max-width: 1200px) {
-    .about :global(.decor-frame) {
+    .about :global(.decor-frame),
+    .fill {
       display: none;
     }
 

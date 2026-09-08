@@ -14,15 +14,20 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     <span class="number">{number}</span>
     <p class="title">{title}</p>
   </div>
-  <ul class="items">
-    {items.map((item) => (
-      <li>{item}</li>
-    ))}
-  </ul>
+  <div class="items-track">
+    <ul class="items">
+      {items.map((item) => (
+        <li>{item}</li>
+      ))}
+    </ul>
+  </div>
 </div>
 
 <style>
   .service {
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --duration: 0.4s;
+
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
@@ -32,9 +37,9 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     padding: clamp(32px, 4vw, 50px) 0 clamp(32px, 5vw, 60px);
     border-bottom: 1px solid var(--border-light);
     transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease,
-      padding 0.3s ease;
+      background-color var(--duration) var(--ease),
+      border-color var(--duration) var(--ease),
+      padding var(--duration) var(--ease);
   }
 
   .service.open {
@@ -54,7 +59,7 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     font-weight: 700;
     font-size: 12px;
     color: var(--text-heading-light);
-    transition: color 0.3s ease;
+    transition: color var(--duration) var(--ease);
   }
 
   .open .number {
@@ -68,11 +73,25 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     letter-spacing: -0.02em;
     text-transform: uppercase;
     color: var(--text-heading-light);
-    transition: color 0.3s ease;
+    transition: color var(--duration) var(--ease);
   }
 
   .open .title {
     color: var(--text-heading-dark);
+  }
+
+  /* Grid 0fr -> 1fr collapses/reveals smoothly regardless of the actual
+     content height — a fixed max-height transition animates at a
+     constant rate unrelated to how much content there actually is,
+     which reads as an abrupt, uneven snap. */
+  .items-track {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration) var(--ease);
+  }
+
+  .open .items-track {
+    grid-template-rows: 1fr;
   }
 
   .items {
@@ -81,19 +100,17 @@ const { number, title, defaultOpen = false, items } = Astro.props;
     line-height: 24px;
     color: var(--text-body-light);
     margin: 0;
-    max-height: 0;
-    opacity: 0;
     overflow: hidden;
+    opacity: 0;
     transition:
-      max-height 0.35s ease,
-      opacity 0.25s ease,
-      color 0.3s ease;
+      opacity calc(var(--duration) * 0.6) var(--ease),
+      color var(--duration) var(--ease);
   }
 
   .open .items {
     color: var(--text-body-dark);
-    max-height: 160px;
     opacity: 1;
+    transition-delay: calc(var(--duration) * 0.15), 0s;
   }
 
   .items li {
