@@ -2,44 +2,229 @@
 import Button from "./Button.astro";
 import ScrollIndicator from "./ScrollIndicator.astro";
 import DecorFrame from "./DecorFrame.astro";
+import { useTranslations } from "../i18n/utils";
+
+const t = useTranslations(Astro.currentLocale);
 ---
 
 <section class="hero" id="hero">
   <DecorFrame>
     <img class="doodle" src="/images/hero-doodle.svg" alt="" aria-hidden="true" />
 
-    <div class="liana liana-1" aria-hidden="true">
+    <canvas class="liana-canvas" aria-hidden="true"></canvas>
+
+    <div class="liana liana-static liana-1" aria-hidden="true">
       <div class="liana-1-rotate">
         <img src="/images/liana-1.svg" alt="" />
       </div>
     </div>
-    <img class="liana liana-2" src="/images/liana-2.svg" alt="" aria-hidden="true" />
-    <img class="liana liana-3" src="/images/liana-3.svg" alt="" aria-hidden="true" />
+    <img class="liana liana-static liana-2" src="/images/liana-2.svg" alt="" aria-hidden="true" />
+    <img class="liana liana-static liana-3" src="/images/liana-3.svg" alt="" aria-hidden="true" />
   </DecorFrame>
 
   <div class="content">
     <div class="text">
-      <h1>WE MAKE<br />BRANDS MOVE</h1>
-      <p class="subtitle">
-        We're Gorilla Industry — a branding and digital agency for brands that refuse to be forgettable. Strategy,
-        identity and motion, built to turn heads.
-      </p>
+      <h1>{t.hero.heading[0]}<br />{t.hero.heading[1]}</h1>
+      <p class="subtitle">{t.hero.subtitle}</p>
     </div>
-    <Button label="START A PROJECT" variant="onLight" />
+    <Button label={t.hero.cta} variant="onLight" />
   </div>
 
   <ScrollIndicator />
 </section>
 
 <script>
-  document.querySelectorAll<HTMLElement>(".hero .liana").forEach((liana) => {
-    liana.addEventListener("pointerenter", () => {
-      liana.classList.add("is-swaying");
+  // Verlet-integrated hanging ropes on a canvas, standing in for the 3
+  // liana SVGs on large desktop screens only. Below 1200px (and under
+  // prefers-reduced-motion) the static SVGs stay untouched instead —
+  // see the CSS below and DESIGN.md.
+  const canvas = document.querySelector<HTMLCanvasElement>(".liana-canvas");
+  const desktopQuery = window.matchMedia("(min-width: 1200px)");
+  const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  if (canvas) {
+    const ctx = canvas.getContext("2d")!;
+
+    const REFERENCE_WIDTH = 1728;
+    const CANVAS_HEIGHT = 650;
+
+    const CONFIG = {
+      gravity: 0.15,
+      friction: 0.96,
+      bounceDistance: 110,
+      ropes: [
+        { xFraction: 0.186, points: 16, spacing: 34, width: 5, hue: 80 },
+        { xFraction: 0.523, points: 13, spacing: 30, width: 2.5, hue: 95 },
+        { xFraction: 0.873, points: 15, spacing: 32, width: 3.5, hue: 70 },
+      ],
+    };
+
+    interface Point {
+      x: number;
+      y: number;
+      oldX: number;
+      oldY: number;
+    }
+
+    class Rope {
+      points: Point[] = [];
+      spacing: number;
+      width: number;
+      color: string;
+
+      constructor(startX: number, count: number, spacing: number, width: number, hue: number) {
+        this.spacing = spacing;
+        this.width = width;
+        this.color = `hsl(${hue}, 22%, 30%)`;
+        for (let i = 0; i < count; i++) {
+          // A little random jitter so the rope doesn't rest as a
+          // mathematically perfect straight line — real vines never do.
+          const jitter = i === 0 ? 0 : (Math.random() - 0.5) * 10;
+          const x = startX + jitter;
+          this.points.push({ x, y: i * spacing, oldX: x, oldY: i * spacing });
+        }
+      }
+
+      update(mouseX: number | null, mouseY: number | null, mouseVX: number, mouseVY: number) {
+        this.points.forEach((p, index) => {
+          if (index === 0) return; // anchored at the top
+
+          const vx = (p.x - p.oldX) * CONFIG.friction;
+          const vy = (p.y - p.oldY) * CONFIG.friction;
+          p.oldX = p.x;
+          p.oldY = p.y;
+
+          p.x += vx;
+          p.y += vy + CONFIG.gravity;
+
+          if (mouseX !== null && mouseY !== null) {
+            const dx = p.x - mouseX;
+            const dy = p.y - mouseY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONFIG.bounceDistance) {
+              const force = (CONFIG.bounceDistance - dist) / CONFIG.bounceDistance;
+              p.x += mouseVX * force * 0.5;
+              p.y += mouseVY * force * 0.5;
+            }
+          }
+        });
+
+        for (let pass = 0; pass < 5; pass++) {
+          for (let i = 0; i < this.points.length - 1; i++) {
+            const p1 = this.points[i];
+            const p2 = this.points[i + 1];
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const error = this.spacing - dist;
+            const percent = error / dist / 2;
+            const offsetX = dx * percent;
+            const offsetY = dy * percent;
+
+            if (i === 0) {
+              p2.x += offsetX * 2;
+              p2.y += offsetY * 2;
+            } else {
+              p1.x -= offsetX;
+              p1.y -= offsetY;
+              p2.x += offsetX;
+              p2.y += offsetY;
+            }
+          }
+        }
+      }
+
+      draw(context: CanvasRenderingContext2D) {
+        context.beginPath();
+        context.moveTo(this.points[0].x, this.points[0].y);
+        for (let i = 1; i < this.points.length - 1; i++) {
+          const xc = (this.points[i].x + this.points[i + 1].x) / 2;
+          const yc = (this.points[i].y + this.points[i + 1].y) / 2;
+          context.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
+        }
+        const last = this.points[this.points.length - 1];
+        context.lineTo(last.x, last.y);
+        context.strokeStyle = this.color;
+        context.lineWidth = this.width;
+        context.lineCap = "round";
+        context.stroke();
+      }
+    }
+
+    let ropes: Rope[] = [];
+    let scale = 1;
+    let rafId = 0;
+    const mouse = { x: null as number | null, y: null as number | null, vx: 0, vy: 0, lastX: 0, lastY: 0 };
+
+    function buildRopes() {
+      ropes = CONFIG.ropes.map((r) => new Rope(r.xFraction * REFERENCE_WIDTH, r.points, r.spacing, r.width, r.hue));
+    }
+
+    function resize() {
+      const rect = canvas!.getBoundingClientRect();
+      scale = rect.width / REFERENCE_WIDTH;
+      const dpr = window.devicePixelRatio || 1;
+      canvas!.width = REFERENCE_WIDTH * dpr;
+      canvas!.height = CANVAS_HEIGHT * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function onPointerMove(event: PointerEvent) {
+      const rect = canvas!.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / scale;
+      const y = (event.clientY - rect.top) / scale;
+      mouse.vx = x - mouse.lastX;
+      mouse.vy = y - mouse.lastY;
+      mouse.x = x;
+      mouse.y = y;
+      mouse.lastX = x;
+      mouse.lastY = y;
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, REFERENCE_WIDTH, CANVAS_HEIGHT);
+      ropes.forEach((rope) => {
+        rope.update(mouse.x, mouse.y, mouse.vx, mouse.vy);
+        rope.draw(ctx);
+      });
+      mouse.vx *= 0.9;
+      mouse.vy *= 0.9;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (rafId) return;
+      buildRopes();
+      resize();
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("resize", resize);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("resize", resize);
+    }
+
+    function sync() {
+      if (desktopQuery.matches && !reducedMotionQuery.matches) {
+        start();
+      } else {
+        stop();
+      }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stop();
+      else sync();
     });
-    liana.addEventListener("animationend", () => {
-      liana.classList.remove("is-swaying");
-    });
-  });
+
+    desktopQuery.addEventListener("change", sync);
+    reducedMotionQuery.addEventListener("change", sync);
+    sync();
+  }
 </script>
 
 <style>
@@ -62,10 +247,22 @@ import DecorFrame from "./DecorFrame.astro";
     opacity: 0.6;
   }
 
+  /* Desktop (>=1200px): the canvas rope simulation. Below that (and
+     under prefers-reduced-motion), the static SVGs render instead — see
+     the <script> above and DESIGN.md. */
+  .liana-canvas {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: -100px;
+    width: 1728px;
+    height: 650px;
+    pointer-events: none;
+  }
+
   .liana {
     position: absolute;
-    z-index: 60;
-    pointer-events: auto;
+    pointer-events: none;
   }
 
   .liana img {
@@ -84,11 +281,6 @@ import DecorFrame from "./DecorFrame.astro";
   .liana-1-rotate {
     width: 95%;
     transform: rotate(-6.44deg);
-    transform-origin: top center;
-  }
-
-  .liana-1.is-swaying .liana-1-rotate {
-    animation: liana-sway-1 1.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
   }
 
   .liana-1-rotate img {
@@ -100,7 +292,6 @@ import DecorFrame from "./DecorFrame.astro";
     left: 842px;
     top: -87px;
     width: 122px;
-    transform-origin: top center;
   }
 
   .liana-2 img {
@@ -108,15 +299,10 @@ import DecorFrame from "./DecorFrame.astro";
     height: auto;
   }
 
-  .liana-2.is-swaying {
-    animation: liana-sway-2 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-  }
-
   .liana-3 {
     left: 1198px;
     top: -111px;
     width: 618px;
-    transform-origin: top center;
   }
 
   .liana-3 img {
@@ -124,86 +310,27 @@ import DecorFrame from "./DecorFrame.astro";
     height: auto;
   }
 
-  .liana-3.is-swaying {
-    animation: liana-sway-3 1.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-  }
+  @media (min-width: 1200px) {
+    .liana-canvas {
+      display: block;
+    }
 
-  @keyframes liana-sway-2 {
-    0% {
-      transform: rotate(0deg) translateX(0);
-    }
-    15% {
-      transform: rotate(10deg) translateX(4px);
-    }
-    35% {
-      transform: rotate(-7deg) translateX(-3px);
-    }
-    55% {
-      transform: rotate(5deg) translateX(2px);
-    }
-    72% {
-      transform: rotate(-3deg) translateX(-1px);
-    }
-    88% {
-      transform: rotate(1.5deg) translateX(0.5px);
-    }
-    100% {
-      transform: rotate(0deg) translateX(0);
-    }
-  }
-
-  @keyframes liana-sway-3 {
-    0% {
-      transform: rotate(0deg) scaleY(1);
-    }
-    25% {
-      transform: rotate(-5deg) scaleY(1.015);
-    }
-    50% {
-      transform: rotate(3deg) scaleY(0.99);
-    }
-    70% {
-      transform: rotate(-2deg) scaleY(1.008);
-    }
-    87% {
-      transform: rotate(1deg) scaleY(0.997);
-    }
-    100% {
-      transform: rotate(0deg) scaleY(1);
-    }
-  }
-
-  @keyframes liana-sway-1 {
-    0% {
-      transform: rotate(-6.44deg);
-    }
-    20% {
-      transform: rotate(-1deg);
-    }
-    45% {
-      transform: rotate(-11deg);
-    }
-    65% {
-      transform: rotate(-4deg);
-    }
-    82% {
-      transform: rotate(-8deg);
-    }
-    100% {
-      transform: rotate(-6.44deg);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .liana.is-swaying,
-    .liana-1.is-swaying .liana-1-rotate {
-      animation: none;
-    }
-  }
-
-  @media (max-width: 1200px) {
-    .liana {
+    .liana-static {
       display: none;
+    }
+  }
+
+  @media (min-width: 1200px) and (prefers-reduced-motion: reduce) {
+    .liana-canvas {
+      display: none;
+    }
+
+    .liana-static {
+      display: block;
+    }
+
+    .liana-1.liana-static {
+      display: flex;
     }
   }
 
